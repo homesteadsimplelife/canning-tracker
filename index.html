@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simple Life Home — Canning &amp; Preserving Tracker</title>
+  <meta name="description" content="Track your garden harvests, canning batches, pantry inventory, and plan next season — all in one place." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Lato:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css" />
+  <style>
+    :root {
+      --sun: #F5C518;
+      --sun-dk: #D4A012;
+      --sun-lt: #FDF3C0;
+      --sun-pale: #FFFBE8;
+      --barn: #8B2016;
+      --barn-md: #A52A1A;
+      --barn-lt: #F5E0DC;
+      --cream: #FAF6EE;
+      --cream-dk: #EDE5D4;
+      --cream-border: #D9CDB8;
+      --ink: #2C1A0E;
+      --ink-md: #5C3D28;
+      --ink-lt: #8C6B50;
+      --sage: #6B8C5A;
+      --sage-lt: #EAF0E5;
+      --white: #FFFFFF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Lato', sans-serif; background: var(--cream); color: var(--ink); min-height: 100vh; }
+
+    .page-wrap { max-width: 760px; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+
+    /* ── HEADER ── */
+    .header { background: var(--barn); border-radius: 16px; padding: 1.2rem 1.5rem; margin-bottom: 1.1rem; display: flex; align-items: center; gap: 16px; }
+    .header-icon { width: 56px; height: 56px; background: var(--sun); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: 3px solid var(--sun-dk); }
+    .header-title { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--sun); line-height: 1.2; }
+    .header-sub { font-size: 12px; color: #F5C51880; margin-top: 3px; letter-spacing: .05em; text-transform: uppercase; }
+
+    /* ── STATS ── */
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.1rem; }
+    .stat { background: var(--white); border: 1.5px solid var(--cream-border); border-radius: 12px; padding: .85rem 1rem; text-align: center; }
+    .stat-val { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 700; color: var(--ink); line-height: 1; }
+    .stat-lbl { font-size: 11px; font-weight: 700; color: var(--ink-lt); margin-top: 4px; text-transform: uppercase; letter-spacing: .05em; }
+    .stat-sub { font-size: 11px; color: var(--ink-lt); margin-top: 2px; }
+    .stat.warn .stat-val, .stat.warn .stat-lbl { color: var(--barn-md); }
+
+    /* ── TABS ── */
+    .tabs { display: flex; background: var(--white); border: 1.5px solid var(--cream-border); border-radius: 12px; overflow: hidden; margin-bottom: 1.1rem; }
+    .tab { flex: 1; background: transparent; border: none; padding: 11px 6px; font-size: 11px; cursor: pointer; color: var(--ink-lt); font-family: 'Lato', sans-serif; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; border-right: 1px solid var(--cream-border); display: flex; flex-direction: column; align-items: center; gap: 4px; transition: background .15s, color .15s; }
+    .tab:last-child { border-right: none; }
+    .tab i { font-size: 20px; }
+    .tab.active { background: var(--barn); color: var(--sun); }
+    .tab:not(.active):hover { background: var(--cream); }
+
+    /* ── BUTTONS ── */
+    .btn-add { background: var(--sun); color: var(--ink); border: 2px solid var(--sun-dk); border-radius: 10px; padding: 9px 18px; font-size: 13px; cursor: pointer; font-family: 'Lato', sans-serif; font-weight: 700; display: inline-flex; align-items: center; gap: 7px; margin-bottom: 1rem; letter-spacing: .02em; }
+    .btn-add:hover { background: var(--sun-dk); color: var(--white); }
+    .btn-save { background: var(--barn); color: var(--white); border: 2px solid var(--barn-md); border-radius: 10px; padding: 9px 18px; font-size: 13px; cursor: pointer; font-family: 'Lato', sans-serif; font-weight: 700; }
+    .btn-save:hover { background: #6B1610; }
+    .btn-cancel { background: transparent; color: var(--ink-md); border: 1.5px solid var(--cream-border); border-radius: 10px; padding: 9px 14px; font-size: 13px; cursor: pointer; font-family: 'Lato', sans-serif; }
+    .btn-cancel:hover { background: var(--cream-dk); }
+    .btn-csv { background: transparent; color: var(--ink-md); border: 1.5px solid var(--cream-border); border-radius: 10px; padding: 9px 14px; font-size: 13px; cursor: pointer; font-family: 'Lato', sans-serif; display: inline-flex; align-items: center; gap: 6px; }
+    .btn-csv:hover { background: var(--cream-dk); }
+    .btn-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 12px; }
+    .btn-icon { background: transparent; border: none; cursor: pointer; color: var(--ink-lt); font-size: 17px; padding: 5px; border-radius: 8px; }
+    .btn-icon:hover { background: var(--cream); color: var(--barn); }
+    .inline-btns { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; align-items: center; }
+
+    /* ── FORM ── */
+    .form-wrap { background: var(--white); border: 1.5px solid var(--cream-border); border-top: 4px solid var(--sun); border-radius: 14px; padding: 1.1rem 1.25rem; margin-bottom: 1rem; }
+    .form-title { font-family: 'Playfair Display', serif; font-size: 17px; font-weight: 700; color: var(--ink); margin-bottom: .9rem; }
+    .fg { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 9px; margin-bottom: 10px; }
+    .span2 { grid-column: span 2; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: 11px; font-weight: 700; color: var(--ink-lt); text-transform: uppercase; letter-spacing: .05em; }
+    .field input, .field select { font-family: 'Lato', sans-serif; font-size: 14px; border: 1.5px solid var(--cream-border); border-radius: 8px; padding: 8px 10px; background: var(--white); color: var(--ink); width: 100%; }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--sun-dk); }
+    .field textarea { resize: vertical; min-height: 56px; padding: 8px 10px; border: 1.5px solid var(--cream-border); border-radius: 8px; font-family: 'Lato', sans-serif; font-size: 14px; background: var(--white); color: var(--ink); width: 100%; }
+    .field textarea:focus { outline: none; border-color: var(--sun-dk); }
+    .form-hint { font-size: 11px; color: var(--ink-lt); margin-bottom: 6px; font-style: italic; }
+
+    /* ── ENTRY CARDS ── */
+    .entry-card { background: var(--white); border: 1.5px solid var(--cream-border); border-left: 5px solid var(--sun); border-radius: 14px; padding: .95rem 1.1rem; margin-bottom: .7rem; display: flex; gap: 10px; align-items: start; }
+    .entry-card.warn-card { border-left-color: var(--barn-md); }
+    .entry-card.exp-card { border-left-color: var(--barn); opacity: .8; }
+    .entry-card.dim-card { border-left-color: var(--cream-border); opacity: .45; }
+    .entry-name { font-family: 'Playfair Display', serif; font-size: 15px; font-weight: 700; color: var(--ink); }
+    .entry-meta { font-size: 12px; color: var(--ink-lt); margin-top: 4px; display: flex; gap: 10px; flex-wrap: wrap; line-height: 1.6; }
+    .entry-note { font-size: 12px; color: var(--ink-lt); margin-top: 5px; font-style: italic; line-height: 1.5; }
+    .row-actions { display: flex; gap: 3px; margin-left: auto; flex-shrink: 0; }
+    .row-actions.col { flex-direction: column; }
+
+    /* ── BADGES ── */
+    .badge { display: inline-block; font-size: 10px; padding: 2px 9px; border-radius: 20px; font-weight: 700; letter-spacing: .04em; margin-left: 6px; text-transform: uppercase; }
+    .b-ok  { background: var(--sage-lt); color: var(--sage); }
+    .b-warn { background: var(--sun-lt); color: #7A5500; }
+    .b-exp  { background: var(--barn-lt); color: var(--barn); }
+    .b-dim  { background: var(--cream-dk); color: var(--ink-lt); }
+
+    /* ── JAR BAR ── */
+    .jar-bar-wrap { height: 7px; background: var(--cream-dk); border-radius: 4px; margin-top: 6px; overflow: hidden; }
+    .jar-bar { height: 7px; background: var(--sage); border-radius: 4px; transition: width .3s; }
+    .jar-bar.low { background: var(--barn-md); }
+
+    /* ── EMPTY STATE ── */
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--ink-lt); }
+    .empty i { font-size: 40px; display: block; margin: 0 auto 10px; opacity: .25; }
+    .empty p { font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; }
+
+    /* ── REVIEW TAB ── */
+    .section-hdr { font-size: 11px; font-weight: 700; color: var(--ink-lt); margin: .9rem 0 .55rem; text-transform: uppercase; letter-spacing: .07em; display: flex; align-items: center; gap: 8px; }
+    .section-hdr::after { content: ''; flex: 1; height: 1px; background: var(--cream-border); }
+    .review-card { background: var(--sun-pale); border: 1.5px solid var(--cream-border); border-radius: 10px; padding: .75rem 1rem; margin-bottom: .5rem; }
+    .rc-lbl { font-size: 11px; font-weight: 700; color: var(--ink-lt); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 2px; }
+    .rc-val { font-family: 'Playfair Display', serif; font-size: 15px; color: var(--ink); }
+    .goals-card { background: var(--white); border: 1.5px solid var(--cream-border); border-radius: 12px; padding: .5rem 1rem; margin-bottom: .9rem; }
+    .goal-row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px dashed var(--cream-border); }
+    .goal-row:last-child { border-bottom: none; }
+    .goal-name { font-family: 'Playfair Display', serif; font-size: 14px; color: var(--ink); flex: 1; }
+    .goal-jars { font-size: 13px; color: var(--ink-lt); margin-right: 4px; }
+
+    /* ── FOOTER ── */
+    .footer { text-align: center; margin-top: 2.5rem; font-size: 12px; color: var(--ink-lt); }
+    .footer a { color: var(--barn-md); text-decoration: none; font-weight: 700; }
+    .footer a:hover { text-decoration: underline; }
+
+    @media (max-width: 500px) {
+      .tab span { display: none; }
+      .header-title { font-size: 18px; }
+      .fg { grid-template-columns: 1fr; }
+      .span2 { grid-column: span 1; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <div id="app"></div>
+  <div class="footer">Made with love &mdash; <a href="https://simplelifehome.com" target="_blank">Simple Life Home</a></div>
+</div>
+
+<script>
+const SHELF = {'jam/jelly':18,'tomatoes':18,'pickles':24,'salsa':18,'green beans':24,'corn':24,'peaches':18,'applesauce':18,'juice':18,'soup/broth':24,'frozen':12,'other':18};
+const PRODUCE = ['tomatoes','green beans','corn','squash','cucumbers','peppers','peaches','strawberries','blueberries','apples','peas','beets','carrots','other'];
+const METHODS = ['water-bath','pressure canner','steam canner','freezer','dehydrator','other'];
+const SIZES   = ['half-pint (8oz)','pint (16oz)','quart (32oz)','half-gallon','quart freezer bag','gallon freezer bag'];
+const UNITS   = ['lbs','oz','kg','bushels','pecks','cups','count'];
+const HEADS   = ['','¼ inch','½ inch','1 inch','1½ inch'];
+
+function ls(k){try{return JSON.parse(localStorage.getItem(k)||'null')}catch{return null}}
+function ss(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
+
+const D = {
+  harvests:  ls('slh_h') || [],
+  batches:   ls('slh_b') || [],
+  inventory: ls('slh_i') || [],
+  goals:     ls('slh_g') || []
+};
+function save(){ss('slh_h',D.harvests);ss('slh_b',D.batches);ss('slh_i',D.inventory);ss('slh_g',D.goals)}
+
+let activeTab = 'harvest';
+let forms = {harvest:null, batch:null, inventory:null, goal:null};
+
+/* ── HELPERS ── */
+function fd(d){if(!d)return'—';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}
+function calcExp(date,type,custom){if(custom)return custom;const d=new Date(date+'T00:00:00');d.setMonth(d.getMonth()+(SHELF[type]||18));return d.toISOString().split('T')[0]}
+function getStatus(e){
+  if(e.usedUp) return 'used';
+  if(!e.expiry) return 'ok';
+  const diff = Math.ceil((new Date(e.expiry)-new Date())/86400000);
+  if(diff < 0)  return 'expired';
+  if(diff <= 60) return 'expiring';
+  return 'ok';
+}
+function badge(s){
+  const m = {ok:'<span class="badge b-ok">Good</span>',expiring:'<span class="badge b-warn">Use soon</span>',expired:'<span class="badge b-exp">Expired</span>',used:'<span class="badge b-dim">Used up</span>'};
+  return m[s]||'';
+}
+function cardCls(s){return s==='expiring'?'entry-card warn-card':s==='expired'?'entry-card exp-card':s==='used'?'entry-card dim-card':'entry-card'}
+function sel(opts,cur,key){return'<select onchange="SF(\''+key+'\',this.value)">'+opts.map(o=>`<option value="${o}"${cur===o?' selected':''}>${o.charAt(0).toUpperCase()+o.slice(1)}</option>`).join('')+'</select>'}
+function inp(type,ph,cur,key,ex=''){return`<input type="${type}" placeholder="${ph}" value="${cur||''}" ${ex} oninput="SF('${key}',this.value)">`}
+function inpD(cur,key){return`<input type="date" value="${cur||''}" onchange="SF('${key}',this.value)">`}
+function ta(ph,cur,key){return`<textarea placeholder="${ph}" oninput="SF('${key}',this.value)">${cur||''}</textarea>`}
+
+/* ── STATE MUTATIONS ── */
+window.SF = function(k,v){ if(forms[activeTab]) forms[activeTab][k]=v; }
+window.setTab = function(t){ activeTab=t; forms={harvest:null,batch:null,inventory:null,goal:null}; render(); }
+window.closeForm = function(){ forms[activeTab]=null; render(); }
+
+window.openForm = function(tab, id){
+  activeTab = tab;
+  if(id){
+    const src = tab==='harvest'?D.harvests:tab==='batch'?D.batches:tab==='inventory'?D.inventory:D.goals;
+    const e = src.find(x=>x.id===id);
+    forms[tab] = e ? {...e} : null;
+  } else {
+    if(tab==='harvest')  forms.harvest  = {produce:'tomatoes',variety:'',datePicked:'',yieldAmt:'',yieldUnit:'lbs',prepNotes:''};
+    else if(tab==='batch') forms.batch  = {item:'',type:'jam/jelly',dateCanned:'',jars:'',jarSize:'pint (16oz)',method:'water-bath',processingTime:'',headspace:'',recipe:'',customExpiry:'',notes:''};
+    else if(tab==='inventory') forms.inventory = {item:'',location:'',jarsTotal:'',jarsLeft:'',dateCanned:'',expiry:'',usedUp:false,notes:''};
+    else forms.goal = {item:'',targetJars:'',year:new Date().getFullYear()+1,notes:''};
+  }
+  render();
+}
+
+window.saveHarvest = function(){
+  const f = forms.harvest;
+  if(!f||!f.produce||!f.datePicked){alert('Please enter produce type and date picked.');return}
+  if(f.id){const i=D.harvests.findIndex(x=>x.id===f.id);if(i>-1)D.harvests[i]={...f}}
+  else D.harvests.push({...f,id:Date.now()});
+  forms.harvest=null; save(); render();
+}
+window.saveBatch = function(){
+  const f = forms.batch;
+  if(!f||!f.item||!f.dateCanned||!f.jars){alert('Please fill in item name, date, and jar count.');return}
+  const exp = calcExp(f.dateCanned,f.type,f.customExpiry);
+  const entry = {...f, id:f.id||Date.now(), jars:parseInt(f.jars)||0, expiry:exp};
+  if(f.id){const i=D.batches.findIndex(x=>x.id===f.id);if(i>-1)D.batches[i]=entry}
+  else{
+    D.batches.push(entry);
+    D.inventory.push({id:Date.now()+1,item:f.item,location:'',jarsTotal:parseInt(f.jars)||0,jarsLeft:parseInt(f.jars)||0,dateCanned:f.dateCanned,expiry:exp,usedUp:false,notes:''});
+  }
+  forms.batch=null; save(); render();
+}
+window.saveInventory = function(){
+  const f = forms.inventory;
+  if(!f||!f.item){alert('Please enter an item name.');return}
+  const entry = {...f, id:f.id||Date.now(), jarsTotal:parseInt(f.jarsTotal)||0, jarsLeft:parseInt(f.jarsLeft)||0};
+  if(f.id){const i=D.inventory.findIndex(x=>x.id===f.id);if(i>-1)D.inventory[i]=entry}
+  else D.inventory.push(entry);
+  forms.inventory=null; save(); render();
+}
+window.saveGoal = function(){
+  const f = forms.goal;
+  if(!f||!f.item||!f.targetJars){alert('Please enter item and target jars.');return}
+  const entry = {...f, id:f.id||Date.now(), targetJars:parseInt(f.targetJars)||0};
+  if(f.id){const i=D.goals.findIndex(x=>x.id===f.id);if(i>-1)D.goals[i]=entry}
+  else D.goals.push(entry);
+  forms.goal=null; save(); render();
+}
+window.delEntry = function(tab,id){
+  if(!confirm('Remove this entry?'))return;
+  if(tab==='harvest')  D.harvests   = D.harvests.filter(x=>x.id!==id);
+  else if(tab==='batch') D.batches  = D.batches.filter(x=>x.id!==id);
+  else if(tab==='inventory') D.inventory = D.inventory.filter(x=>x.id!==id);
+  else D.goals = D.goals.filter(x=>x.id!==id);
+  save(); render();
+}
+window.useJar = function(id){
+  const e=D.inventory.find(x=>x.id===id);
+  if(!e)return;
+  if(e.jarsLeft>0) e.jarsLeft--;
+  if(e.jarsLeft===0) e.usedUp=true;
+  save(); render();
+}
+window.toggleUsed = function(id){
+  const e=D.inventory.find(x=>x.id===id);
+  if(e){e.usedUp=!e.usedUp;if(!e.usedUp&&e.jarsLeft===0)e.jarsLeft=1;save();render();}
+}
+window.exportCSV = function(){
+  const rows=[['Section','Item','Date','Details','Notes']];
+  D.harvests.forEach(e=>rows.push(['Harvest',e.produce+(e.variety?' ('+e.variety+')':''),fd(e.datePicked),(e.yieldAmt||'?')+' '+e.yieldUnit,e.prepNotes]));
+  D.batches.forEach(e=>rows.push(['Batch',e.item,fd(e.dateCanned),e.jars+'x '+e.jarSize+' '+e.method,e.notes]));
+  D.inventory.forEach(e=>rows.push(['Inventory',e.item,fd(e.dateCanned),e.jarsLeft+'/'+e.jarsTotal+' @ '+e.location,e.notes]));
+  D.goals.forEach(e=>rows.push(['Goal '+e.year,e.item,'',e.targetJars+' jars',e.notes]));
+  const csv=rows.map(r=>r.map(c=>'"'+String(c||'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='canning-tracker.csv';a.click();
+}
+
+/* ── FORM TEMPLATES ── */
+function fHarvest(){
+  const f=forms.harvest||{};
+  return `<div class="form-wrap">
+    <div class="form-title">${f.id?'Edit harvest entry':'Log a garden harvest'}</div>
+    <div class="fg">
+      <div class="field"><label>Produce</label>${sel(PRODUCE,f.produce||'tomatoes','produce')}</div>
+      <div class="field"><label>Variety (e.g. Roma, Beefsteak)</label>${inp('text','e.g. Roma',f.variety,'variety')}</div>
+      <div class="field"><label>Date picked</label>${inpD(f.datePicked,'datePicked')}</div>
+      <div class="field"><label>Yield amount</label>${inp('number','e.g. 22',f.yieldAmt,'yieldAmt','min="0" step="0.1"')}</div>
+      <div class="field"><label>Unit</label>${sel(UNITS,f.yieldUnit||'lbs','yieldUnit')}</div>
+    </div>
+    <div class="field" style="margin-bottom:6px"><label>Prep notes (blanched, pureed skin-on, etc.)</label>${ta('e.g. Blanched 3 min, packed in strips',f.prepNotes,'prepNotes')}</div>
+    <div class="btn-row">
+      <button class="btn-save" onclick="saveHarvest()"><i class="ti ti-device-floppy"></i> Save harvest</button>
+      <button class="btn-cancel" onclick="closeForm()">Cancel</button>
+    </div>
+  </div>`;
+}
+function fBatch(){
+  const f=forms.batch||{};
+  return `<div class="form-wrap">
+    <div class="form-title">${f.id?'Edit batch':'Log a canning or freezing batch'}</div>
+    <div class="fg">
+      <div class="field span2"><label>Item name</label>${inp('text','e.g. Strawberry jam, Dill pickles',f.item,'item')}</div>
+      <div class="field"><label>Type</label>${sel(Object.keys(SHELF),f.type||'jam/jelly','type')}</div>
+      <div class="field"><label>Date processed</label>${inpD(f.dateCanned,'dateCanned')}</div>
+      <div class="field"><label>Number of jars/bags</label>${inp('number','e.g. 12',f.jars,'jars','min="1"')}</div>
+      <div class="field"><label>Jar / bag size</label>${sel(SIZES,f.jarSize||'pint (16oz)','jarSize')}</div>
+      <div class="field"><label>Method</label>${sel(METHODS,f.method||'water-bath','method')}</div>
+      <div class="field"><label>Processing time (min)</label>${inp('number','e.g. 10',f.processingTime,'processingTime','min="0"')}</div>
+      <div class="field"><label>Headspace</label>${sel(HEADS,f.headspace||'','headspace')}</div>
+      <div class="field"><label>Recipe / source</label>${inp('text','e.g. Ball Blue Book p.42',f.recipe,'recipe')}</div>
+      <div class="field"><label>Custom expiry (optional)</label>${inpD(f.customExpiry,'customExpiry')}</div>
+    </div>
+    <div class="field" style="margin-bottom:4px"><label>Notes</label>${ta('e.g. Added extra dill, low sugar batch',f.notes,'notes')}</div>
+    <div class="form-hint">Expiry is auto-calculated from type unless you set a custom date.</div>
+    <div class="btn-row">
+      <button class="btn-save" onclick="saveBatch()"><i class="ti ti-device-floppy"></i> Save batch</button>
+      <button class="btn-cancel" onclick="closeForm()">Cancel</button>
+    </div>
+  </div>`;
+}
+function fInventory(){
+  const f=forms.inventory||{};
+  return `<div class="form-wrap">
+    <div class="form-title">${f.id?'Edit item':'Add pantry or freezer item'}</div>
+    <div class="fg">
+      <div class="field span2"><label>Item name</label>${inp('text','e.g. Peach jam, Green beans',f.item,'item')}</div>
+      <div class="field"><label>Storage location</label>${inp('text','e.g. Basement shelf 2, Back freezer',f.location,'location')}</div>
+      <div class="field"><label>Total jars canned</label>${inp('number','e.g. 18',f.jarsTotal,'jarsTotal','min="0"')}</div>
+      <div class="field"><label>Jars remaining</label>${inp('number','e.g. 14',f.jarsLeft,'jarsLeft','min="0"')}</div>
+      <div class="field"><label>Date canned</label>${inpD(f.dateCanned,'dateCanned')}</div>
+      <div class="field"><label>Expiry date</label>${inpD(f.expiry,'expiry')}</div>
+    </div>
+    <div class="field" style="margin-bottom:6px"><label>Notes</label>${ta('e.g. Ran out Jan — need more next year',f.notes,'notes')}</div>
+    <div class="btn-row">
+      <button class="btn-save" onclick="saveInventory()"><i class="ti ti-device-floppy"></i> Save item</button>
+      <button class="btn-cancel" onclick="closeForm()">Cancel</button>
+    </div>
+  </div>`;
+}
+function fGoal(){
+  const f=forms.goal||{};
+  return `<div class="form-wrap">
+    <div class="form-title">${f.id?'Edit goal':'Add a next-season goal'}</div>
+    <div class="fg">
+      <div class="field span2"><label>Item</label>${inp('text','e.g. Strawberry jam, Dill pickles',f.item,'item')}</div>
+      <div class="field"><label>Target jars</label>${inp('number','e.g. 24',f.targetJars,'targetJars','min="1"')}</div>
+      <div class="field"><label>Season year</label>${inp('number','',f.year||new Date().getFullYear()+1,'year','min="2024" max="2040"')}</div>
+    </div>
+    <div class="field" style="margin-bottom:6px"><label>Notes (why — ran out early, new variety, etc.)</label>${ta('',f.notes,'notes')}</div>
+    <div class="btn-row">
+      <button class="btn-save" onclick="saveGoal()"><i class="ti ti-device-floppy"></i> Save goal</button>
+      <button class="btn-cancel" onclick="closeForm()">Cancel</button>
+    </div>
+  </div>`;
+}
+
+/* ── MAIN RENDER ── */
+function render(){
+  const yr = new Date().getFullYear();
+  const totalJars  = D.inventory.filter(e=>!e.usedUp).reduce((s,e)=>s+(parseInt(e.jarsLeft)||0),0);
+  const bYr        = D.batches.filter(e=>e.dateCanned&&e.dateCanned.startsWith(yr)).length;
+  const hYr        = D.harvests.filter(e=>e.datePicked&&e.datePicked.startsWith(yr)).length;
+  const warnCount  = D.inventory.filter(e=>getStatus(e)==='expiring').length;
+  const expCount   = D.inventory.filter(e=>getStatus(e)==='expired').length;
+
+  const header = `<div class="header">
+    <div class="header-icon">
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="16" cy="16" r="5.5" fill="#8B2016"/>
+        <line x1="16" y1="2" x2="16" y2="8.5" stroke="#8B2016" stroke-width="2.3" stroke-linecap="round"/>
+        <line x1="16" y1="23.5" x2="16" y2="30" stroke="#8B2016" stroke-width="2.3" stroke-linecap="round"/>
+        <line x1="2" y1="16" x2="8.5" y2="16" stroke="#8B2016" stroke-width="2.3" stroke-linecap="round"/>
+        <line x1="23.5" y1="16" x2="30" y2="16" stroke="#8B2016" stroke-width="2.3" stroke-linecap="round"/>
+        <line x1="6.3" y1="6.3" x2="10.9" y2="10.9" stroke="#8B2016" stroke-width="2" stroke-linecap="round"/>
+        <line x1="21.1" y1="21.1" x2="25.7" y2="25.7" stroke="#8B2016" stroke-width="2" stroke-linecap="round"/>
+        <line x1="25.7" y1="6.3" x2="21.1" y2="10.9" stroke="#8B2016" stroke-width="2" stroke-linecap="round"/>
+        <line x1="10.9" y1="21.1" x2="6.3" y2="25.7" stroke="#8B2016" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div>
+      <div class="header-title">Simple Life Home</div>
+      <div class="header-sub">Canning &amp; Preserving Tracker</div>
+    </div>
+  </div>`;
+
+  const stats = `<div class="stat-grid">
+    <div class="stat"><div class="stat-val">${totalJars}</div><div class="stat-lbl">Jars in pantry</div><div class="stat-sub">${D.inventory.filter(e=>!e.usedUp).length} items tracked</div></div>
+    <div class="stat"><div class="stat-val">${bYr}</div><div class="stat-lbl">Batches this year</div><div class="stat-sub">${hYr} harvest logs</div></div>
+    <div class="stat${warnCount>0?' warn':''}"><div class="stat-val">${warnCount}</div><div class="stat-lbl">Use soon</div><div class="stat-sub">within 60 days</div></div>
+    <div class="stat${expCount>0?' warn':''}"><div class="stat-val">${expCount}</div><div class="stat-lbl">Expired</div><div class="stat-sub">past best-by</div></div>
+  </div>`;
+
+  const tabs = ['harvest','batch','inventory','review'];
+  const tabIcons = ['ti-plant','ti-jar','ti-building-store','ti-chart-bar'];
+  const tabLabels = ['Harvest','Canning','Pantry','Review'];
+  const tabBar = `<div class="tabs">${tabs.map((t,i)=>`<button class="tab${activeTab===t?' active':''}" onclick="setTab('${t}')"><i class="ti ${tabIcons[i]}" aria-hidden="true"></i><span>${tabLabels[i]}</span></button>`).join('')}</div>`;
+
+  let tc = '';
+
+  /* HARVEST TAB */
+  if(activeTab==='harvest'){
+    const formHTML = forms.harvest!==null ? fHarvest() : `<button class="btn-add" onclick="openForm('harvest',null)"><i class="ti ti-plus" aria-hidden="true"></i>Log a harvest</button>`;
+    const list = D.harvests.slice().reverse();
+    tc = formHTML + (list.length===0
+      ? `<div class="empty"><i class="ti ti-plant"></i><p>No harvests logged yet — tap above to record your first pick!</p></div>`
+      : list.map(e=>`<div class="entry-card">
+          <div style="flex:1">
+            <div class="entry-name">${e.produce.charAt(0).toUpperCase()+e.produce.slice(1)}${e.variety?' &mdash; '+e.variety:''}</div>
+            <div class="entry-meta">
+              <span><i class="ti ti-calendar" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> ${fd(e.datePicked)}</span>
+              ${e.yieldAmt?`<span><i class="ti ti-scale" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> ${e.yieldAmt} ${e.yieldUnit}</span>`:''}
+            </div>
+            ${e.prepNotes?`<div class="entry-note">Prep: ${e.prepNotes}</div>`:''}
+          </div>
+          <div class="row-actions">
+            <button class="btn-icon" onclick="openForm('harvest',${e.id})" aria-label="Edit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+            <button class="btn-icon" onclick="delEntry('harvest',${e.id})" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button>
+          </div>
+        </div>`).join(''));
+  }
+
+  /* BATCH TAB */
+  else if(activeTab==='batch'){
+    const formHTML = forms.batch!==null ? fBatch() : `<button class="btn-add" onclick="openForm('batch',null)"><i class="ti ti-plus" aria-hidden="true"></i>Log a batch</button>`;
+    const list = D.batches.slice().reverse();
+    tc = formHTML + (list.length===0
+      ? `<div class="empty"><i class="ti ti-jar"></i><p>No batches logged yet &mdash; your first jar awaits!</p></div>`
+      : list.map(e=>`<div class="entry-card">
+          <div style="flex:1">
+            <div class="entry-name">${e.item}</div>
+            <div class="entry-meta">
+              <span><i class="ti ti-calendar" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> ${fd(e.dateCanned)}</span>
+              <span>${e.jars}&times; ${e.jarSize}</span>
+              <span style="text-transform:capitalize">${e.method}</span>
+              ${e.processingTime?`<span>${e.processingTime} min</span>`:''}
+              ${e.headspace?`<span>${e.headspace} headspace</span>`:''}
+            </div>
+            ${e.recipe?`<div class="entry-note">Source: ${e.recipe}</div>`:''}
+            ${e.notes?`<div class="entry-note">${e.notes}</div>`:''}
+            <div class="entry-meta" style="margin-top:5px">
+              <span><i class="ti ti-clock" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> Expires ${fd(e.expiry)}</span>
+            </div>
+          </div>
+          <div class="row-actions">
+            <button class="btn-icon" onclick="openForm('batch',${e.id})" aria-label="Edit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+            <button class="btn-icon" onclick="delEntry('batch',${e.id})" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button>
+          </div>
+        </div>`).join(''));
+  }
+
+  /* INVENTORY TAB */
+  else if(activeTab==='inventory'){
+    const formHTML = forms.inventory!==null ? fInventory() : `<div class="inline-btns">
+      <button class="btn-add" style="margin-bottom:0" onclick="openForm('inventory',null)"><i class="ti ti-plus" aria-hidden="true"></i>Add item</button>
+      <button class="btn-csv" onclick="exportCSV()"><i class="ti ti-download" aria-hidden="true"></i>Export CSV</button>
+    </div>`;
+    const list = D.inventory.slice().sort((a,b)=>{const o={expired:0,expiring:1,ok:2,used:3};return(o[getStatus(a)]||2)-(o[getStatus(b)]||2)});
+    tc = formHTML + (list.length===0
+      ? `<div class="empty"><i class="ti ti-building-store"></i><p>Your pantry is empty &mdash; add your first jar!</p></div>`
+      : list.map(e=>{
+          const s=getStatus(e);
+          const jl=parseInt(e.jarsLeft)||0, jt=parseInt(e.jarsTotal)||0;
+          const pct=jt>0?Math.round(jl/jt*100):0;
+          return `<div class="${cardCls(s)}">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">
+                <span class="entry-name">${e.item}</span>${badge(s)}
+              </div>
+              <div class="entry-meta">
+                ${e.location?`<span><i class="ti ti-map-pin" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> ${e.location}</span>`:''}
+                <span>${jl} of ${jt} jars${jt>0?' ('+pct+'%)':''}</span>
+                ${e.expiry?`<span><i class="ti ti-clock" style="font-size:13px;vertical-align:-1px" aria-hidden="true"></i> Exp: ${fd(e.expiry)}</span>`:''}
+              </div>
+              ${jt>0?`<div class="jar-bar-wrap"><div class="jar-bar${pct<25?' low':''}" style="width:${pct}%"></div></div>`:''}
+              ${e.notes?`<div class="entry-note">${e.notes}</div>`:''}
+            </div>
+            <div class="row-actions col">
+              <button class="btn-icon" onclick="useJar(${e.id})" title="Use one jar" aria-label="Use one jar"><i class="ti ti-minus" aria-hidden="true"></i></button>
+              <button class="btn-icon" onclick="toggleUsed(${e.id})" title="${e.usedUp?'Restore to pantry':'Mark all used'}" aria-label="${e.usedUp?'Restore':'Mark used'}"><i class="ti ${e.usedUp?'ti-rotate-clockwise':'ti-check'}" aria-hidden="true"></i></button>
+              <button class="btn-icon" onclick="openForm('inventory',${e.id})" aria-label="Edit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+              <button class="btn-icon" onclick="delEntry('inventory',${e.id})" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button>
+            </div>
+          </div>`;
+        }).join(''));
+  }
+
+  /* REVIEW TAB */
+  else if(activeTab==='review'){
+    const formHTML = forms.goal!==null ? fGoal() : `<button class="btn-add" onclick="openForm('goal',null)"><i class="ti ti-plus" aria-hidden="true"></i>Add next-season goal</button>`;
+    const consumed  = D.inventory.filter(e=>e.usedUp||parseInt(e.jarsLeft)===0);
+    const lowStock  = D.inventory.filter(e=>!e.usedUp&&e.jarsTotal>0&&e.jarsLeft>0&&(e.jarsLeft/e.jarsTotal)<0.25);
+    const nextYr    = yr+1;
+    const goalsNext = D.goals.filter(g=>parseInt(g.year)===nextYr);
+
+    const summary = `<div class="stat-grid" style="grid-template-columns:repeat(auto-fit,minmax(135px,1fr));margin-bottom:.85rem">
+      <div class="stat"><div class="stat-val">${consumed.length}</div><div class="stat-lbl">Fully used</div></div>
+      <div class="stat"><div class="stat-val">${lowStock.length}</div><div class="stat-lbl">Running low</div><div class="stat-sub">&lt;25% remaining</div></div>
+      <div class="stat"><div class="stat-val">${totalJars}</div><div class="stat-lbl">Jars remaining</div></div>
+      <div class="stat"><div class="stat-val">${bYr}</div><div class="stat-lbl">This season</div></div>
+    </div>`;
+
+    const usedHTML = consumed.length===0 ? '' : `<div class="section-hdr">Ran out this season</div>`
+      + consumed.map(e=>`<div class="review-card"><div class="rc-lbl">Fully used</div><div class="rc-val">${e.item}</div>${e.notes?`<div style="font-size:12px;color:var(--ink-lt);margin-top:3px">${e.notes}</div>`:''}</div>`).join('');
+
+    const lowHTML = lowStock.length===0 ? '' : `<div class="section-hdr">Getting low &mdash; plan more next year</div>`
+      + lowStock.map(e=>`<div class="review-card"><div class="rc-lbl">Only ${parseInt(e.jarsLeft)||0} jar${parseInt(e.jarsLeft)===1?'':'s'} left</div><div class="rc-val">${e.item}</div></div>`).join('');
+
+    const goalsHTML = `<div class="section-hdr">${nextYr} season goals</div>`
+      + (goalsNext.length===0
+        ? `<p style="font-size:13px;color:var(--ink-lt);font-style:italic;margin-bottom:.85rem">No goals set yet &mdash; add your first one below!</p>`
+        : `<div class="goals-card">`+goalsNext.map(g=>`<div class="goal-row">
+            <span class="goal-name">${g.item}</span>
+            <span class="goal-jars">${g.targetJars} jars</span>
+            <button class="btn-icon" onclick="openForm('goal',${g.id})" aria-label="Edit"><i class="ti ti-edit" aria-hidden="true"></i></button>
+            <button class="btn-icon" onclick="delEntry('goal',${g.id})" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></button>
+          </div>`).join('')+`</div>`);
+
+    tc = summary + usedHTML + lowHTML + goalsHTML + formHTML;
+  }
+
+  document.getElementById('app').innerHTML = header + stats + tabBar + `<div id="tc">${tc}</div>`;
+}
+
+render();
+</script>
+</body>
+</html>
